@@ -1,17 +1,170 @@
 import React, { useState, useEffect } from 'react';
 
-// Simple localStorage for data persistence
-const storage = {
-  getJobs: () => JSON.parse(localStorage.getItem('jobs') || '[]'),
-  setJobs: (jobs) => localStorage.setItem('jobs', JSON.stringify(jobs)),
-  getContainers: () => JSON.parse(localStorage.getItem('containers') || '[]'),
-  setContainers: (containers) => localStorage.setItem('containers', JSON.stringify(containers)),
-  getCustomers: () => JSON.parse(localStorage.getItem('customers') || '[]'),
-  setCustomers: (customers) => localStorage.setItem('customers', JSON.stringify(customers)),
-  getLeads: () => JSON.parse(localStorage.getItem('leads') || '[]'),
-  setLeads: (leads) => localStorage.setItem('leads', JSON.stringify(leads)),
-  getAccounts: () => JSON.parse(localStorage.getItem('accounts') || '[]'),
-  setAccounts: (accounts) => localStorage.setItem('accounts', JSON.stringify(accounts))
+// Firebase initialization
+const firebaseConfig = {
+  apiKey: "AIzaSyDEWoN5s2YXe68Onra-ZCiIPd46oTY7gYQ",
+  authDomain: "atlantic-gateway-crm.firebaseapp.com",
+  projectId: "atlantic-gateway-crm",
+  storageBucket: "atlantic-gateway-crm.firebasestorage.app",
+  messagingSenderId: "645062832562",
+  appId: "1:645062832562:web:a1e04d2db87fdf6c0834ab"
+};
+
+let db = null;
+
+const initFirebase = async () => {
+  if (typeof window !== 'undefined' && window.firebase) {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+  }
+};
+
+// Firestore operations
+const firestoreOps = {
+  async getJobs() {
+    if (!db) return [];
+    try {
+      const snapshot = await db.collection('jobs').get();
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting jobs:', error);
+      return [];
+    }
+  },
+
+  async addJob(job) {
+    if (!db) return;
+    try {
+      await db.collection('jobs').add(job);
+    } catch (error) {
+      console.error('Error adding job:', error);
+    }
+  },
+
+  async deleteJob(jobId) {
+    if (!db) return;
+    try {
+      await db.collection('jobs').doc(jobId).delete();
+    } catch (error) {
+      console.error('Error deleting job:', error);
+    }
+  },
+
+  async getContainers() {
+    if (!db) return [];
+    try {
+      const snapshot = await db.collection('containers').get();
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting containers:', error);
+      return [];
+    }
+  },
+
+  async addContainer(container) {
+    if (!db) return;
+    try {
+      await db.collection('containers').add(container);
+    } catch (error) {
+      console.error('Error adding container:', error);
+    }
+  },
+
+  async deleteContainer(containerId) {
+    if (!db) return;
+    try {
+      await db.collection('containers').doc(containerId).delete();
+    } catch (error) {
+      console.error('Error deleting container:', error);
+    }
+  },
+
+  async getCustomers() {
+    if (!db) return [];
+    try {
+      const snapshot = await db.collection('customers').get();
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting customers:', error);
+      return [];
+    }
+  },
+
+  async addCustomer(customer) {
+    if (!db) return;
+    try {
+      await db.collection('customers').add(customer);
+    } catch (error) {
+      console.error('Error adding customer:', error);
+    }
+  },
+
+  async deleteCustomer(customerId) {
+    if (!db) return;
+    try {
+      await db.collection('customers').doc(customerId).delete();
+    } catch (error) {
+      console.error('Error deleting customer:', error);
+    }
+  },
+
+  async getLeads() {
+    if (!db) return [];
+    try {
+      const snapshot = await db.collection('leads').get();
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting leads:', error);
+      return [];
+    }
+  },
+
+  async addLead(lead) {
+    if (!db) return;
+    try {
+      await db.collection('leads').add(lead);
+    } catch (error) {
+      console.error('Error adding lead:', error);
+    }
+  },
+
+  async deleteLead(leadId) {
+    if (!db) return;
+    try {
+      await db.collection('leads').doc(leadId).delete();
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+    }
+  },
+
+  async getAccounts() {
+    if (!db) return [];
+    try {
+      const snapshot = await db.collection('accounts').get();
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting accounts:', error);
+      return [];
+    }
+  },
+
+  async addAccount(account) {
+    if (!db) return;
+    try {
+      await db.collection('accounts').add(account);
+    } catch (error) {
+      console.error('Error adding account:', error);
+    }
+  },
+
+  async deleteAccount(accountId) {
+    if (!db) return;
+    try {
+      await db.collection('accounts').doc(accountId).delete();
+    } catch (error) {
+      console.error('Error deleting account:', error);
+    }
+  }
 };
 
 function App() {
@@ -64,12 +217,23 @@ function App() {
 
   // Load data on mount
   useEffect(() => {
-    setJobs(storage.getJobs());
-    setContainers(storage.getContainers());
-    setCustomers(storage.getCustomers());
-    setLeads(storage.getLeads());
-    setAccounts(storage.getAccounts());
+    initFirebase();
+    loadAllData();
   }, []);
+
+  const loadAllData = async () => {
+    const jobsData = await firestoreOps.getJobs();
+    const containersData = await firestoreOps.getContainers();
+    const customersData = await firestoreOps.getCustomers();
+    const leadsData = await firestoreOps.getLeads();
+    const accountsData = await firestoreOps.getAccounts();
+    
+    setJobs(jobsData);
+    setContainers(containersData);
+    setCustomers(customersData);
+    setLeads(leadsData);
+    setAccounts(accountsData);
+  };
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -83,11 +247,11 @@ function App() {
   };
 
   // Jobs functions
-  const addJob = () => {
+  const addJob = async () => {
     if (jobForm.jobId && jobForm.jobName) {
-      const newJobs = [...jobs, jobForm];
-      setJobs(newJobs);
-      storage.setJobs(newJobs);
+      await firestoreOps.addJob(jobForm);
+      const updatedJobs = await firestoreOps.getJobs();
+      setJobs(updatedJobs);
       setJobForm({ jobId: '', jobName: '', customer: '', status: 'active', assignedTo: '' });
       setShowJobModal(false);
     } else {
@@ -95,18 +259,18 @@ function App() {
     }
   };
 
-  const deleteJob = (jobId) => {
-    const newJobs = jobs.filter(j => j.jobId !== jobId);
-    setJobs(newJobs);
-    storage.setJobs(newJobs);
+  const deleteJob = async (jobId) => {
+    await firestoreOps.deleteJob(jobId);
+    const updatedJobs = await firestoreOps.getJobs();
+    setJobs(updatedJobs);
   };
 
   // Containers functions
-  const addContainer = () => {
+  const addContainer = async () => {
     if (containerForm.containerId && containerForm.containerName) {
-      const newContainers = [...containers, containerForm];
-      setContainers(newContainers);
-      storage.setContainers(newContainers);
+      await firestoreOps.addContainer(containerForm);
+      const updatedContainers = await firestoreOps.getContainers();
+      setContainers(updatedContainers);
       setContainerForm({
         containerId: '',
         containerName: '',
@@ -135,18 +299,18 @@ function App() {
     }
   };
 
-  const deleteContainer = (containerId) => {
-    const newContainers = containers.filter(c => c.containerId !== containerId);
-    setContainers(newContainers);
-    storage.setContainers(newContainers);
+  const deleteContainer = async (containerId) => {
+    await firestoreOps.deleteContainer(containerId);
+    const updatedContainers = await firestoreOps.getContainers();
+    setContainers(updatedContainers);
   };
 
   // Customers functions
-  const addCustomer = () => {
+  const addCustomer = async () => {
     if (customerForm.customerId && customerForm.customerName) {
-      const newCustomers = [...customers, customerForm];
-      setCustomers(newCustomers);
-      storage.setCustomers(newCustomers);
+      await firestoreOps.addCustomer(customerForm);
+      const updatedCustomers = await firestoreOps.getCustomers();
+      setCustomers(updatedCustomers);
       setCustomerForm({ customerId: '', customerName: '', email: '', phone: '', address: '', country: '' });
       setShowCustomerModal(false);
     } else {
@@ -154,18 +318,18 @@ function App() {
     }
   };
 
-  const deleteCustomer = (customerId) => {
-    const newCustomers = customers.filter(c => c.customerId !== customerId);
-    setCustomers(newCustomers);
-    storage.setCustomers(newCustomers);
+  const deleteCustomer = async (customerId) => {
+    await firestoreOps.deleteCustomer(customerId);
+    const updatedCustomers = await firestoreOps.getCustomers();
+    setCustomers(updatedCustomers);
   };
 
   // Leads functions
-  const addLead = () => {
+  const addLead = async () => {
     if (leadForm.leadId && leadForm.companyName) {
-      const newLeads = [...leads, leadForm];
-      setLeads(newLeads);
-      storage.setLeads(newLeads);
+      await firestoreOps.addLead(leadForm);
+      const updatedLeads = await firestoreOps.getLeads();
+      setLeads(updatedLeads);
       setLeadForm({ leadId: '', companyName: '', contactPerson: '', email: '', phone: '', status: 'new', value: '' });
       setShowLeadModal(false);
     } else {
@@ -173,18 +337,18 @@ function App() {
     }
   };
 
-  const deleteLead = (leadId) => {
-    const newLeads = leads.filter(l => l.leadId !== leadId);
-    setLeads(newLeads);
-    storage.setLeads(newLeads);
+  const deleteLead = async (leadId) => {
+    await firestoreOps.deleteLead(leadId);
+    const updatedLeads = await firestoreOps.getLeads();
+    setLeads(updatedLeads);
   };
 
   // Accounts functions
-  const addAccount = () => {
+  const addAccount = async () => {
     if (accountForm.accountId && accountForm.accountName) {
-      const newAccounts = [...accounts, accountForm];
-      setAccounts(newAccounts);
-      storage.setAccounts(newAccounts);
+      await firestoreOps.addAccount(accountForm);
+      const updatedAccounts = await firestoreOps.getAccounts();
+      setAccounts(updatedAccounts);
       setAccountForm({ accountId: '', accountName: '', customer: '', balance: 0, status: 'active' });
       setShowAccountModal(false);
     } else {
@@ -192,10 +356,10 @@ function App() {
     }
   };
 
-  const deleteAccount = (accountId) => {
-    const newAccounts = accounts.filter(a => a.accountId !== accountId);
-    setAccounts(newAccounts);
-    storage.setAccounts(newAccounts);
+  const deleteAccount = async (accountId) => {
+    await firestoreOps.deleteAccount(accountId);
+    const updatedAccounts = await firestoreOps.getAccounts();
+    setAccounts(updatedAccounts);
   };
 
   if (!user) {
@@ -301,7 +465,7 @@ function App() {
                 <p style={{ color: '#94a3b8' }}>No jobs yet. Create your first job!</p>
               ) : (
                 jobs.map(job => (
-                  <div key={job.jobId} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
+                  <div key={job.id} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                       <div style={{ flex: 1 }}>
                         <h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{job.jobName}</h3>
@@ -311,7 +475,7 @@ function App() {
                         <p style={{ color: '#cbd5e1', margin: 0, fontSize: '14px' }}>Status: <span style={{ color: job.status === 'active' ? '#10b981' : '#ef4444' }}>{job.status}</span></p>
                       </div>
                       {user.role === 'admin' && (
-                        <button onClick={() => deleteJob(job.jobId)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                        <button onClick={() => deleteJob(job.id)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                           Delete
                         </button>
                       )}
@@ -353,7 +517,7 @@ function App() {
                 <p style={{ color: '#94a3b8' }}>No containers yet. Add your first container!</p>
               ) : (
                 containers.map(container => (
-                  <div key={container.containerId} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
+                  <div key={container.id} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                       <div style={{ flex: 1 }}>
                         <h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{container.containerName}</h3>
@@ -370,7 +534,7 @@ function App() {
                         </div>
                       </div>
                       {user.role === 'admin' && (
-                        <button onClick={() => deleteContainer(container.containerId)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                        <button onClick={() => deleteContainer(container.id)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                           Delete
                         </button>
                       )}
@@ -418,7 +582,7 @@ function App() {
                 <p style={{ color: '#94a3b8' }}>No customers yet. Add your first customer!</p>
               ) : (
                 customers.map(customer => (
-                  <div key={customer.customerId} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
+                  <div key={customer.id} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                       <div style={{ flex: 1 }}>
                         <h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{customer.customerName}</h3>
@@ -428,7 +592,7 @@ function App() {
                         <p style={{ color: '#cbd5e1', margin: '0 0 4px 0', fontSize: '14px' }}>Country: {customer.country}</p>
                       </div>
                       {user.role === 'admin' && (
-                        <button onClick={() => deleteCustomer(customer.customerId)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                        <button onClick={() => deleteCustomer(customer.id)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                           Delete
                         </button>
                       )}
@@ -467,7 +631,7 @@ function App() {
                 <p style={{ color: '#94a3b8' }}>No leads yet. Add your first lead!</p>
               ) : (
                 leads.map(lead => (
-                  <div key={lead.leadId} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
+                  <div key={lead.id} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                       <div style={{ flex: 1 }}>
                         <h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{lead.companyName}</h3>
@@ -478,7 +642,7 @@ function App() {
                         <p style={{ color: '#cbd5e1', margin: 0, fontSize: '14px' }}>Value: ${lead.value}</p>
                       </div>
                       {user.role === 'admin' && (
-                        <button onClick={() => deleteLead(lead.leadId)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                        <button onClick={() => deleteLead(lead.id)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                           Delete
                         </button>
                       )}
@@ -522,7 +686,7 @@ function App() {
                 <p style={{ color: '#94a3b8' }}>No accounts yet. Add your first account!</p>
               ) : (
                 accounts.map(account => (
-                  <div key={account.accountId} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
+                  <div key={account.id} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                       <div style={{ flex: 1 }}>
                         <h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{account.accountName}</h3>
@@ -532,7 +696,7 @@ function App() {
                         <p style={{ color: '#cbd5e1', margin: 0, fontSize: '14px' }}>Status: <span style={{ color: account.status === 'active' ? '#10b981' : '#ef4444' }}>{account.status}</span></p>
                       </div>
                       {user.role === 'admin' && (
-                        <button onClick={() => deleteAccount(account.accountId)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                        <button onClick={() => deleteAccount(account.id)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                           Delete
                         </button>
                       )}
