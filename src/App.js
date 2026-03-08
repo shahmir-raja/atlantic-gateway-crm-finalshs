@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 let db = null;
-let firebaseReady = false;
 
 // Wait for Firebase to be available
 const waitForFirebase = () => {
@@ -22,7 +21,6 @@ const waitForFirebase = () => {
             });
           }
           db = window.firebase.firestore();
-          firebaseReady = true;
           console.log('Firebase ready');
           resolve(true);
         } catch (e) {
