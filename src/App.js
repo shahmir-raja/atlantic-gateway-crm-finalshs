@@ -5,7 +5,13 @@ const storage = {
   getJobs: () => JSON.parse(localStorage.getItem('jobs') || '[]'),
   setJobs: (jobs) => localStorage.setItem('jobs', JSON.stringify(jobs)),
   getContainers: () => JSON.parse(localStorage.getItem('containers') || '[]'),
-  setContainers: (containers) => localStorage.setItem('containers', JSON.stringify(containers))
+  setContainers: (containers) => localStorage.setItem('containers', JSON.stringify(containers)),
+  getCustomers: () => JSON.parse(localStorage.getItem('customers') || '[]'),
+  setCustomers: (customers) => localStorage.setItem('customers', JSON.stringify(customers)),
+  getLeads: () => JSON.parse(localStorage.getItem('leads') || '[]'),
+  setLeads: (leads) => localStorage.setItem('leads', JSON.stringify(leads)),
+  getAccounts: () => JSON.parse(localStorage.getItem('accounts') || '[]'),
+  setAccounts: (accounts) => localStorage.setItem('accounts', JSON.stringify(accounts))
 };
 
 function App() {
@@ -14,14 +20,22 @@ function App() {
   const [password, setPassword] = useState('admin123');
   const [tab, setTab] = useState('dashboard');
   
-  // Job states
+  // All data states
   const [jobs, setJobs] = useState([]);
-  const [showJobModal, setShowJobModal] = useState(false);
-  const [jobForm, setJobForm] = useState({ jobId: '', jobName: '', customer: '', status: 'active', assignedTo: '' });
-  
-  // Container states
   const [containers, setContainers] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [leads, setLeads] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  
+  // Modal states
+  const [showJobModal, setShowJobModal] = useState(false);
   const [showContainerModal, setShowContainerModal] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [showLeadModal, setShowLeadModal] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  
+  // Form states
+  const [jobForm, setJobForm] = useState({ jobId: '', jobName: '', customer: '', status: 'active', assignedTo: '' });
   const [containerForm, setContainerForm] = useState({
     containerId: '',
     containerName: '',
@@ -44,11 +58,17 @@ function App() {
     agent: '',
     remarks: ''
   });
+  const [customerForm, setCustomerForm] = useState({ customerId: '', customerName: '', email: '', phone: '', address: '', country: '' });
+  const [leadForm, setLeadForm] = useState({ leadId: '', companyName: '', contactPerson: '', email: '', phone: '', status: 'new', value: '' });
+  const [accountForm, setAccountForm] = useState({ accountId: '', accountName: '', customer: '', balance: 0, status: 'active' });
 
   // Load data on mount
   useEffect(() => {
     setJobs(storage.getJobs());
     setContainers(storage.getContainers());
+    setCustomers(storage.getCustomers());
+    setLeads(storage.getLeads());
+    setAccounts(storage.getAccounts());
   }, []);
 
   const handleLogin = (e) => {
@@ -62,6 +82,7 @@ function App() {
     }
   };
 
+  // Jobs functions
   const addJob = () => {
     if (jobForm.jobId && jobForm.jobName) {
       const newJobs = [...jobs, jobForm];
@@ -80,6 +101,7 @@ function App() {
     storage.setJobs(newJobs);
   };
 
+  // Containers functions
   const addContainer = () => {
     if (containerForm.containerId && containerForm.containerName) {
       const newContainers = [...containers, containerForm];
@@ -117,6 +139,63 @@ function App() {
     const newContainers = containers.filter(c => c.containerId !== containerId);
     setContainers(newContainers);
     storage.setContainers(newContainers);
+  };
+
+  // Customers functions
+  const addCustomer = () => {
+    if (customerForm.customerId && customerForm.customerName) {
+      const newCustomers = [...customers, customerForm];
+      setCustomers(newCustomers);
+      storage.setCustomers(newCustomers);
+      setCustomerForm({ customerId: '', customerName: '', email: '', phone: '', address: '', country: '' });
+      setShowCustomerModal(false);
+    } else {
+      alert('Please fill in all required fields');
+    }
+  };
+
+  const deleteCustomer = (customerId) => {
+    const newCustomers = customers.filter(c => c.customerId !== customerId);
+    setCustomers(newCustomers);
+    storage.setCustomers(newCustomers);
+  };
+
+  // Leads functions
+  const addLead = () => {
+    if (leadForm.leadId && leadForm.companyName) {
+      const newLeads = [...leads, leadForm];
+      setLeads(newLeads);
+      storage.setLeads(newLeads);
+      setLeadForm({ leadId: '', companyName: '', contactPerson: '', email: '', phone: '', status: 'new', value: '' });
+      setShowLeadModal(false);
+    } else {
+      alert('Please fill in all required fields');
+    }
+  };
+
+  const deleteLead = (leadId) => {
+    const newLeads = leads.filter(l => l.leadId !== leadId);
+    setLeads(newLeads);
+    storage.setLeads(newLeads);
+  };
+
+  // Accounts functions
+  const addAccount = () => {
+    if (accountForm.accountId && accountForm.accountName) {
+      const newAccounts = [...accounts, accountForm];
+      setAccounts(newAccounts);
+      storage.setAccounts(newAccounts);
+      setAccountForm({ accountId: '', accountName: '', customer: '', balance: 0, status: 'active' });
+      setShowAccountModal(false);
+    } else {
+      alert('Please fill in all required fields');
+    }
+  };
+
+  const deleteAccount = (accountId) => {
+    const newAccounts = accounts.filter(a => a.accountId !== accountId);
+    setAccounts(newAccounts);
+    storage.setAccounts(newAccounts);
   };
 
   if (!user) {
@@ -201,8 +280,8 @@ function App() {
               {[
                 { label: 'Total Jobs', value: jobs.length },
                 { label: 'Containers', value: containers.length },
-                { label: 'Customers', value: 0 },
-                { label: 'Active Leads', value: 0 }
+                { label: 'Customers', value: customers.length },
+                { label: 'Active Leads', value: leads.length }
               ].map((stat, i) => (
                 <div key={i} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155' }}>
                   <p style={{ color: '#94a3b8', margin: '0 0 12px 0', fontSize: '14px' }}>{stat.label}</p>
@@ -248,7 +327,7 @@ function App() {
                     <input type="text" placeholder="Job ID" value={jobForm.jobId} onChange={(e) => setJobForm({...jobForm, jobId: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
                     <input type="text" placeholder="Job Name" value={jobForm.jobName} onChange={(e) => setJobForm({...jobForm, jobName: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
                     <input type="text" placeholder="Customer" value={jobForm.customer} onChange={(e) => setJobForm({...jobForm, customer: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="Assigned To (Person Name)" value={jobForm.assignedTo} onChange={(e) => setJobForm({...jobForm, assignedTo: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Assigned To" value={jobForm.assignedTo} onChange={(e) => setJobForm({...jobForm, assignedTo: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
                     <select value={jobForm.status} onChange={(e) => setJobForm({...jobForm, status: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }}>
                       <option value="active">Active</option>
                       <option value="inactive">Inactive</option>
@@ -311,8 +390,8 @@ function App() {
                       <option value="40ft">40ft</option>
                       <option value="45ft">45ft</option>
                     </select>
-                    <input type="text" placeholder="POL (Port of Loading)" value={containerForm.pol} onChange={(e) => setContainerForm({...containerForm, pol: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="POD (Port of Discharge)" value={containerForm.pod} onChange={(e) => setContainerForm({...containerForm, pod: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="POL" value={containerForm.pol} onChange={(e) => setContainerForm({...containerForm, pol: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="POD" value={containerForm.pod} onChange={(e) => setContainerForm({...containerForm, pod: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
                     <input type="date" placeholder="ETA" value={containerForm.eta} onChange={(e) => setContainerForm({...containerForm, eta: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
                     <input type="number" placeholder="Free Days" value={containerForm.freeDays} onChange={(e) => setContainerForm({...containerForm, freeDays: parseInt(e.target.value) || 0})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
                     <input type="text" placeholder="BL Number" value={containerForm.blNumber} onChange={(e) => setContainerForm({...containerForm, blNumber: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
@@ -329,9 +408,160 @@ function App() {
             </div>
           )}
 
-          {tab === 'customers' && <p style={{ color: '#94a3b8' }}>Customer management coming soon...</p>}
-          {tab === 'leads' && <p style={{ color: '#94a3b8' }}>Lead tracking coming soon...</p>}
-          {tab === 'accounts' && <p style={{ color: '#94a3b8' }}>Account management coming soon...</p>}
+          {tab === 'customers' && (
+            <div>
+              <button onClick={() => setShowCustomerModal(true)} style={{ padding: '10px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px', fontWeight: 'bold' }}>
+                + Add Customer
+              </button>
+              
+              {customers.length === 0 ? (
+                <p style={{ color: '#94a3b8' }}>No customers yet. Add your first customer!</p>
+              ) : (
+                customers.map(customer => (
+                  <div key={customer.customerId} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                      <div style={{ flex: 1 }}>
+                        <h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{customer.customerName}</h3>
+                        <p style={{ color: '#94a3b8', margin: '0 0 8px 0', fontSize: '14px' }}>ID: {customer.customerId}</p>
+                        <p style={{ color: '#cbd5e1', margin: '0 0 4px 0', fontSize: '14px' }}>Email: {customer.email}</p>
+                        <p style={{ color: '#cbd5e1', margin: '0 0 4px 0', fontSize: '14px' }}>Phone: {customer.phone}</p>
+                        <p style={{ color: '#cbd5e1', margin: '0 0 4px 0', fontSize: '14px' }}>Country: {customer.country}</p>
+                      </div>
+                      {user.role === 'admin' && (
+                        <button onClick={() => deleteCustomer(customer.customerId)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+
+              {showCustomerModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+                  <div style={{ background: '#1e293b', padding: '30px', borderRadius: '8px', width: '100%', maxWidth: '500px', border: '1px solid #334155', maxHeight: '90vh', overflow: 'auto' }}>
+                    <h2 style={{ margin: '0 0 20px 0', color: 'white' }}>Add New Customer</h2>
+                    <input type="text" placeholder="Customer ID" value={customerForm.customerId} onChange={(e) => setCustomerForm({...customerForm, customerId: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Customer Name" value={customerForm.customerName} onChange={(e) => setCustomerForm({...customerForm, customerName: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="email" placeholder="Email" value={customerForm.email} onChange={(e) => setCustomerForm({...customerForm, email: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="tel" placeholder="Phone" value={customerForm.phone} onChange={(e) => setCustomerForm({...customerForm, phone: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Address" value={customerForm.address} onChange={(e) => setCustomerForm({...customerForm, address: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Country" value={customerForm.country} onChange={(e) => setCustomerForm({...customerForm, country: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button onClick={addCustomer} style={{ flex: 1, padding: '10px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Create</button>
+                      <button onClick={() => setShowCustomerModal(false)} style={{ flex: 1, padding: '10px', background: '#475569', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === 'leads' && (
+            <div>
+              <button onClick={() => setShowLeadModal(true)} style={{ padding: '10px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px', fontWeight: 'bold' }}>
+                + Add Lead
+              </button>
+              
+              {leads.length === 0 ? (
+                <p style={{ color: '#94a3b8' }}>No leads yet. Add your first lead!</p>
+              ) : (
+                leads.map(lead => (
+                  <div key={lead.leadId} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                      <div style={{ flex: 1 }}>
+                        <h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{lead.companyName}</h3>
+                        <p style={{ color: '#94a3b8', margin: '0 0 8px 0', fontSize: '14px' }}>ID: {lead.leadId}</p>
+                        <p style={{ color: '#cbd5e1', margin: '0 0 4px 0', fontSize: '14px' }}>Contact: {lead.contactPerson}</p>
+                        <p style={{ color: '#cbd5e1', margin: '0 0 4px 0', fontSize: '14px' }}>Email: {lead.email}</p>
+                        <p style={{ color: '#cbd5e1', margin: '0 0 4px 0', fontSize: '14px' }}>Status: <span style={{ color: lead.status === 'new' ? '#f59e0b' : lead.status === 'contacted' ? '#3b82f6' : '#10b981' }}>{lead.status}</span></p>
+                        <p style={{ color: '#cbd5e1', margin: 0, fontSize: '14px' }}>Value: ${lead.value}</p>
+                      </div>
+                      {user.role === 'admin' && (
+                        <button onClick={() => deleteLead(lead.leadId)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+
+              {showLeadModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+                  <div style={{ background: '#1e293b', padding: '30px', borderRadius: '8px', width: '100%', maxWidth: '500px', border: '1px solid #334155', maxHeight: '90vh', overflow: 'auto' }}>
+                    <h2 style={{ margin: '0 0 20px 0', color: 'white' }}>Add New Lead</h2>
+                    <input type="text" placeholder="Lead ID" value={leadForm.leadId} onChange={(e) => setLeadForm({...leadForm, leadId: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Company Name" value={leadForm.companyName} onChange={(e) => setLeadForm({...leadForm, companyName: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Contact Person" value={leadForm.contactPerson} onChange={(e) => setLeadForm({...leadForm, contactPerson: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="email" placeholder="Email" value={leadForm.email} onChange={(e) => setLeadForm({...leadForm, email: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="tel" placeholder="Phone" value={leadForm.phone} onChange={(e) => setLeadForm({...leadForm, phone: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <select value={leadForm.status} onChange={(e) => setLeadForm({...leadForm, status: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }}>
+                      <option value="new">New</option>
+                      <option value="contacted">Contacted</option>
+                      <option value="qualified">Qualified</option>
+                    </select>
+                    <input type="text" placeholder="Potential Value" value={leadForm.value} onChange={(e) => setLeadForm({...leadForm, value: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button onClick={addLead} style={{ flex: 1, padding: '10px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Create</button>
+                      <button onClick={() => setShowLeadModal(false)} style={{ flex: 1, padding: '10px', background: '#475569', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === 'accounts' && (
+            <div>
+              <button onClick={() => setShowAccountModal(true)} style={{ padding: '10px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px', fontWeight: 'bold' }}>
+                + Add Account
+              </button>
+              
+              {accounts.length === 0 ? (
+                <p style={{ color: '#94a3b8' }}>No accounts yet. Add your first account!</p>
+              ) : (
+                accounts.map(account => (
+                  <div key={account.accountId} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                      <div style={{ flex: 1 }}>
+                        <h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{account.accountName}</h3>
+                        <p style={{ color: '#94a3b8', margin: '0 0 8px 0', fontSize: '14px' }}>ID: {account.accountId}</p>
+                        <p style={{ color: '#cbd5e1', margin: '0 0 4px 0', fontSize: '14px' }}>Customer: {account.customer}</p>
+                        <p style={{ color: '#cbd5e1', margin: '0 0 4px 0', fontSize: '14px' }}>Balance: ${account.balance.toFixed(2)}</p>
+                        <p style={{ color: '#cbd5e1', margin: 0, fontSize: '14px' }}>Status: <span style={{ color: account.status === 'active' ? '#10b981' : '#ef4444' }}>{account.status}</span></p>
+                      </div>
+                      {user.role === 'admin' && (
+                        <button onClick={() => deleteAccount(account.accountId)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+
+              {showAccountModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+                  <div style={{ background: '#1e293b', padding: '30px', borderRadius: '8px', width: '100%', maxWidth: '500px', border: '1px solid #334155', maxHeight: '90vh', overflow: 'auto' }}>
+                    <h2 style={{ margin: '0 0 20px 0', color: 'white' }}>Add New Account</h2>
+                    <input type="text" placeholder="Account ID" value={accountForm.accountId} onChange={(e) => setAccountForm({...accountForm, accountId: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Account Name" value={accountForm.accountName} onChange={(e) => setAccountForm({...accountForm, accountName: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Customer" value={accountForm.customer} onChange={(e) => setAccountForm({...accountForm, customer: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="number" placeholder="Balance" step="0.01" value={accountForm.balance} onChange={(e) => setAccountForm({...accountForm, balance: parseFloat(e.target.value) || 0})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <select value={accountForm.status} onChange={(e) => setAccountForm({...accountForm, status: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }}>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button onClick={addAccount} style={{ flex: 1, padding: '10px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Create</button>
+                      <button onClick={() => setShowAccountModal(false)} style={{ flex: 1, padding: '10px', background: '#475569', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
