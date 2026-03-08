@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-
-// Simple localStorage for now (will upgrade to Firebase)
+// Simple localStorage for data persistence
 const storage = {
   getJobs: () => JSON.parse(localStorage.getItem('jobs') || '[]'),
   setJobs: (jobs) => localStorage.setItem('jobs', JSON.stringify(jobs)),
