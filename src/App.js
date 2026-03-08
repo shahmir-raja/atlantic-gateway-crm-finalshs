@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// Firebase config - we'll add this
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDEWoN5s2YXe68Onra-ZCiIPd46oTY7gYQ",
-  authDomain: "atlantic-gateway-crm.firebaseapp.com",
-  projectId: "atlantic-gateway-crm",
-  storageBucket: "atlantic-gateway-crm.firebasestorage.app",
-  messagingSenderId: "645062832562",
-  appId: "1:645062832562:web:a1e04d2db87fdf6c0834ab"
-};
 
 // Simple localStorage for now (will upgrade to Firebase)
 const storage = {
