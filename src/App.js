@@ -1,168 +1,216 @@
 import React, { useState, useEffect } from 'react';
 
-// Firebase initialization
-const firebaseConfig = {
-  apiKey: "AIzaSyDEWoN5s2YXe68Onra-ZCiIPd46oTY7gYQ",
-  authDomain: "atlantic-gateway-crm.firebaseapp.com",
-  projectId: "atlantic-gateway-crm",
-  storageBucket: "atlantic-gateway-crm.firebasestorage.app",
-  messagingSenderId: "645062832562",
-  appId: "1:645062832562:web:a1e04d2db87fdf6c0834ab"
-};
-
 let db = null;
 
-const initFirebase = async () => {
-  if (typeof window !== 'undefined' && window.firebase) {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-  }
+// Wait for Firebase to load, then initialize
+const initFirebase = () => {
+  return new Promise((resolve) => {
+    const checkFirebase = setInterval(() => {
+      if (window.firebase) {
+        clearInterval(checkFirebase);
+        
+        if (!window.firebase.apps.length) {
+          window.firebase.initializeApp({
+            apiKey: "AIzaSyDEWoN5s2YXe68Onra-ZCiIPd46oTY7gYQ",
+            authDomain: "atlantic-gateway-crm.firebaseapp.com",
+            projectId: "atlantic-gateway-crm",
+            storageBucket: "atlantic-gateway-crm.firebasestorage.app",
+            messagingSenderId: "645062832562",
+            appId: "1:645062832562:web:a1e04d2db87fdf6c0834ab"
+          });
+        }
+        
+        db = window.firebase.firestore();
+        resolve(db);
+      }
+    }, 100);
+  });
 };
 
-// Firestore operations
+// Firestore operations with localStorage fallback
 const firestoreOps = {
   async getJobs() {
-    if (!db) return [];
     try {
+      if (!db) return JSON.parse(localStorage.getItem('jobs') || '[]');
       const snapshot = await db.collection('jobs').get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
-      console.error('Error getting jobs:', error);
-      return [];
+      console.log('Using localStorage for jobs');
+      return JSON.parse(localStorage.getItem('jobs') || '[]');
     }
   },
 
   async addJob(job) {
-    if (!db) return;
     try {
-      await db.collection('jobs').add(job);
+      if (db) {
+        await db.collection('jobs').add(job);
+      }
     } catch (error) {
-      console.error('Error adding job:', error);
+      console.log('Adding to localStorage');
+      const jobs = JSON.parse(localStorage.getItem('jobs') || '[]');
+      jobs.push({...job, id: Date.now()});
+      localStorage.setItem('jobs', JSON.stringify(jobs));
     }
   },
 
   async deleteJob(jobId) {
-    if (!db) return;
     try {
-      await db.collection('jobs').doc(jobId).delete();
+      if (db) {
+        await db.collection('jobs').doc(jobId).delete();
+      }
     } catch (error) {
-      console.error('Error deleting job:', error);
+      console.log('Deleting from localStorage');
+      const jobs = JSON.parse(localStorage.getItem('jobs') || '[]');
+      const filtered = jobs.filter(j => j.id !== jobId);
+      localStorage.setItem('jobs', JSON.stringify(filtered));
     }
   },
 
   async getContainers() {
-    if (!db) return [];
     try {
+      if (!db) return JSON.parse(localStorage.getItem('containers') || '[]');
       const snapshot = await db.collection('containers').get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
-      console.error('Error getting containers:', error);
-      return [];
+      console.log('Using localStorage for containers');
+      return JSON.parse(localStorage.getItem('containers') || '[]');
     }
   },
 
   async addContainer(container) {
-    if (!db) return;
     try {
-      await db.collection('containers').add(container);
+      if (db) {
+        await db.collection('containers').add(container);
+      }
     } catch (error) {
-      console.error('Error adding container:', error);
+      console.log('Adding to localStorage');
+      const containers = JSON.parse(localStorage.getItem('containers') || '[]');
+      containers.push({...container, id: Date.now()});
+      localStorage.setItem('containers', JSON.stringify(containers));
     }
   },
 
   async deleteContainer(containerId) {
-    if (!db) return;
     try {
-      await db.collection('containers').doc(containerId).delete();
+      if (db) {
+        await db.collection('containers').doc(containerId).delete();
+      }
     } catch (error) {
-      console.error('Error deleting container:', error);
+      console.log('Deleting from localStorage');
+      const containers = JSON.parse(localStorage.getItem('containers') || '[]');
+      const filtered = containers.filter(c => c.id !== containerId);
+      localStorage.setItem('containers', JSON.stringify(filtered));
     }
   },
 
   async getCustomers() {
-    if (!db) return [];
     try {
+      if (!db) return JSON.parse(localStorage.getItem('customers') || '[]');
       const snapshot = await db.collection('customers').get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
-      console.error('Error getting customers:', error);
-      return [];
+      console.log('Using localStorage for customers');
+      return JSON.parse(localStorage.getItem('customers') || '[]');
     }
   },
 
   async addCustomer(customer) {
-    if (!db) return;
     try {
-      await db.collection('customers').add(customer);
+      if (db) {
+        await db.collection('customers').add(customer);
+      }
     } catch (error) {
-      console.error('Error adding customer:', error);
+      console.log('Adding to localStorage');
+      const customers = JSON.parse(localStorage.getItem('customers') || '[]');
+      customers.push({...customer, id: Date.now()});
+      localStorage.setItem('customers', JSON.stringify(customers));
     }
   },
 
   async deleteCustomer(customerId) {
-    if (!db) return;
     try {
-      await db.collection('customers').doc(customerId).delete();
+      if (db) {
+        await db.collection('customers').doc(customerId).delete();
+      }
     } catch (error) {
-      console.error('Error deleting customer:', error);
+      console.log('Deleting from localStorage');
+      const customers = JSON.parse(localStorage.getItem('customers') || '[]');
+      const filtered = customers.filter(c => c.id !== customerId);
+      localStorage.setItem('customers', JSON.stringify(filtered));
     }
   },
 
   async getLeads() {
-    if (!db) return [];
     try {
+      if (!db) return JSON.parse(localStorage.getItem('leads') || '[]');
       const snapshot = await db.collection('leads').get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
-      console.error('Error getting leads:', error);
-      return [];
+      console.log('Using localStorage for leads');
+      return JSON.parse(localStorage.getItem('leads') || '[]');
     }
   },
 
   async addLead(lead) {
-    if (!db) return;
     try {
-      await db.collection('leads').add(lead);
+      if (db) {
+        await db.collection('leads').add(lead);
+      }
     } catch (error) {
-      console.error('Error adding lead:', error);
+      console.log('Adding to localStorage');
+      const leads = JSON.parse(localStorage.getItem('leads') || '[]');
+      leads.push({...lead, id: Date.now()});
+      localStorage.setItem('leads', JSON.stringify(leads));
     }
   },
 
   async deleteLead(leadId) {
-    if (!db) return;
     try {
-      await db.collection('leads').doc(leadId).delete();
+      if (db) {
+        await db.collection('leads').doc(leadId).delete();
+      }
     } catch (error) {
-      console.error('Error deleting lead:', error);
+      console.log('Deleting from localStorage');
+      const leads = JSON.parse(localStorage.getItem('leads') || '[]');
+      const filtered = leads.filter(l => l.id !== leadId);
+      localStorage.setItem('leads', JSON.stringify(filtered));
     }
   },
 
   async getAccounts() {
-    if (!db) return [];
     try {
+      if (!db) return JSON.parse(localStorage.getItem('accounts') || '[]');
       const snapshot = await db.collection('accounts').get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
-      console.error('Error getting accounts:', error);
-      return [];
+      console.log('Using localStorage for accounts');
+      return JSON.parse(localStorage.getItem('accounts') || '[]');
     }
   },
 
   async addAccount(account) {
-    if (!db) return;
     try {
-      await db.collection('accounts').add(account);
+      if (db) {
+        await db.collection('accounts').add(account);
+      }
     } catch (error) {
-      console.error('Error adding account:', error);
+      console.log('Adding to localStorage');
+      const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+      accounts.push({...account, id: Date.now()});
+      localStorage.setItem('accounts', JSON.stringify(accounts));
     }
   },
 
   async deleteAccount(accountId) {
-    if (!db) return;
     try {
-      await db.collection('accounts').doc(accountId).delete();
+      if (db) {
+        await db.collection('accounts').doc(accountId).delete();
+      }
     } catch (error) {
-      console.error('Error deleting account:', error);
+      console.log('Deleting from localStorage');
+      const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+      const filtered = accounts.filter(a => a.id !== accountId);
+      localStorage.setItem('accounts', JSON.stringify(filtered));
     }
   }
 };
@@ -173,21 +221,18 @@ function App() {
   const [password, setPassword] = useState('admin123');
   const [tab, setTab] = useState('dashboard');
   
-  // All data states
   const [jobs, setJobs] = useState([]);
   const [containers, setContainers] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [leads, setLeads] = useState([]);
   const [accounts, setAccounts] = useState([]);
   
-  // Modal states
   const [showJobModal, setShowJobModal] = useState(false);
   const [showContainerModal, setShowContainerModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showLeadModal, setShowLeadModal] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
   
-  // Form states
   const [jobForm, setJobForm] = useState({ jobId: '', jobName: '', customer: '', status: 'active', assignedTo: '' });
   const [containerForm, setContainerForm] = useState({
     containerId: '',
@@ -215,10 +260,10 @@ function App() {
   const [leadForm, setLeadForm] = useState({ leadId: '', companyName: '', contactPerson: '', email: '', phone: '', status: 'new', value: '' });
   const [accountForm, setAccountForm] = useState({ accountId: '', accountName: '', customer: '', balance: 0, status: 'active' });
 
-  // Load data on mount
   useEffect(() => {
-    initFirebase();
-    loadAllData();
+    initFirebase().then(() => {
+      loadAllData();
+    });
   }, []);
 
   const loadAllData = async () => {
@@ -246,7 +291,6 @@ function App() {
     }
   };
 
-  // Jobs functions
   const addJob = async () => {
     if (jobForm.jobId && jobForm.jobName) {
       await firestoreOps.addJob(jobForm);
@@ -265,7 +309,6 @@ function App() {
     setJobs(updatedJobs);
   };
 
-  // Containers functions
   const addContainer = async () => {
     if (containerForm.containerId && containerForm.containerName) {
       await firestoreOps.addContainer(containerForm);
@@ -305,7 +348,6 @@ function App() {
     setContainers(updatedContainers);
   };
 
-  // Customers functions
   const addCustomer = async () => {
     if (customerForm.customerId && customerForm.customerName) {
       await firestoreOps.addCustomer(customerForm);
@@ -324,7 +366,6 @@ function App() {
     setCustomers(updatedCustomers);
   };
 
-  // Leads functions
   const addLead = async () => {
     if (leadForm.leadId && leadForm.companyName) {
       await firestoreOps.addLead(leadForm);
@@ -343,7 +384,6 @@ function App() {
     setLeads(updatedLeads);
   };
 
-  // Accounts functions
   const addAccount = async () => {
     if (accountForm.accountId && accountForm.accountName) {
       await firestoreOps.addAccount(accountForm);
