@@ -247,7 +247,7 @@ function App() {
 
   useEffect(() => {
     loadAllData();
-  }, [user]);
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadAllData = async () => {
     if (!user) return;
