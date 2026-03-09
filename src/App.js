@@ -1,40 +1,220 @@
 import React, { useState, useEffect } from 'react';
 
-let db = null;
+const API_KEY = "AIzaSyDEWoN5s2YXe68Onra-ZCiIPd46oTY7gYQ";
+const PROJECT_ID = "atlantic-gateway-crm";
+const BASE_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
-// Wait for Firebase to be available
-const waitForFirebase = () => {
-  return new Promise((resolve) => {
-    const checkFirebase = setInterval(() => {
-      if (window.firebase && window.firebase.firestore) {
-        clearInterval(checkFirebase);
-        
-        try {
-          if (!window.firebase.apps || window.firebase.apps.length === 0) {
-            window.firebase.initializeApp({
-              apiKey: "AIzaSyDEWoN5s2YXe68Onra-ZCiIPd46oTY7gYQ",
-              authDomain: "atlantic-gateway-crm.firebaseapp.com",
-              projectId: "atlantic-gateway-crm",
-              storageBucket: "atlantic-gateway-crm.firebasestorage.app",
-              messagingSenderId: "645062832562",
-              appId: "1:645062832562:web:a1e04d2db87fdf6c0834ab"
-            });
-          }
-          db = window.firebase.firestore();
-          console.log('Firebase ready');
-          resolve(true);
-        } catch (e) {
-          console.error('Firebase error:', e);
-          resolve(false);
-        }
+// Firebase REST API functions
+const firebaseAPI = {
+  async addJob(job) {
+    try {
+      const response = await fetch(`${BASE_URL}/jobs?key=${API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: job })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error adding job:', error);
+      throw error;
+    }
+  },
+
+  async getJobs() {
+    try {
+      const response = await fetch(`${BASE_URL}/jobs?key=${API_KEY}`);
+      const data = await response.json();
+      if (data.documents) {
+        return data.documents.map(doc => ({
+          id: doc.name.split('/').pop(),
+          ...doc.fields
+        }));
       }
-    }, 100);
-    
-    setTimeout(() => {
-      clearInterval(checkFirebase);
-      resolve(false);
-    }, 5000);
-  });
+      return [];
+    } catch (error) {
+      console.error('Error getting jobs:', error);
+      return [];
+    }
+  },
+
+  async deleteJob(jobId) {
+    try {
+      await fetch(`${BASE_URL}/jobs/${jobId}?key=${API_KEY}`, {
+        method: 'DELETE'
+      });
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      throw error;
+    }
+  },
+
+  async addContainer(container) {
+    try {
+      const response = await fetch(`${BASE_URL}/containers?key=${API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: container })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error adding container:', error);
+      throw error;
+    }
+  },
+
+  async getContainers() {
+    try {
+      const response = await fetch(`${BASE_URL}/containers?key=${API_KEY}`);
+      const data = await response.json();
+      if (data.documents) {
+        return data.documents.map(doc => ({
+          id: doc.name.split('/').pop(),
+          ...doc.fields
+        }));
+      }
+      return [];
+    } catch (error) {
+      console.error('Error getting containers:', error);
+      return [];
+    }
+  },
+
+  async deleteContainer(containerId) {
+    try {
+      await fetch(`${BASE_URL}/containers/${containerId}?key=${API_KEY}`, {
+        method: 'DELETE'
+      });
+    } catch (error) {
+      console.error('Error deleting container:', error);
+      throw error;
+    }
+  },
+
+  async addCustomer(customer) {
+    try {
+      const response = await fetch(`${BASE_URL}/customers?key=${API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: customer })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error adding customer:', error);
+      throw error;
+    }
+  },
+
+  async getCustomers() {
+    try {
+      const response = await fetch(`${BASE_URL}/customers?key=${API_KEY}`);
+      const data = await response.json();
+      if (data.documents) {
+        return data.documents.map(doc => ({
+          id: doc.name.split('/').pop(),
+          ...doc.fields
+        }));
+      }
+      return [];
+    } catch (error) {
+      console.error('Error getting customers:', error);
+      return [];
+    }
+  },
+
+  async deleteCustomer(customerId) {
+    try {
+      await fetch(`${BASE_URL}/customers/${customerId}?key=${API_KEY}`, {
+        method: 'DELETE'
+      });
+    } catch (error) {
+      console.error('Error deleting customer:', error);
+      throw error;
+    }
+  },
+
+  async addLead(lead) {
+    try {
+      const response = await fetch(`${BASE_URL}/leads?key=${API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: lead })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error adding lead:', error);
+      throw error;
+    }
+  },
+
+  async getLeads() {
+    try {
+      const response = await fetch(`${BASE_URL}/leads?key=${API_KEY}`);
+      const data = await response.json();
+      if (data.documents) {
+        return data.documents.map(doc => ({
+          id: doc.name.split('/').pop(),
+          ...doc.fields
+        }));
+      }
+      return [];
+    } catch (error) {
+      console.error('Error getting leads:', error);
+      return [];
+    }
+  },
+
+  async deleteLead(leadId) {
+    try {
+      await fetch(`${BASE_URL}/leads/${leadId}?key=${API_KEY}`, {
+        method: 'DELETE'
+      });
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+      throw error;
+    }
+  },
+
+  async addAccount(account) {
+    try {
+      const response = await fetch(`${BASE_URL}/accounts?key=${API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: account })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error adding account:', error);
+      throw error;
+    }
+  },
+
+  async getAccounts() {
+    try {
+      const response = await fetch(`${BASE_URL}/accounts?key=${API_KEY}`);
+      const data = await response.json();
+      if (data.documents) {
+        return data.documents.map(doc => ({
+          id: doc.name.split('/').pop(),
+          ...doc.fields
+        }));
+      }
+      return [];
+    } catch (error) {
+      console.error('Error getting accounts:', error);
+      return [];
+    }
+  },
+
+  async deleteAccount(accountId) {
+    try {
+      await fetch(`${BASE_URL}/accounts/${accountId}?key=${API_KEY}`, {
+        method: 'DELETE'
+      });
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      throw error;
+    }
+  }
 };
 
 function App() {
@@ -42,6 +222,7 @@ function App() {
   const [email, setEmail] = useState('admin@atlanticgateway.com');
   const [password, setPassword] = useState('admin123');
   const [tab, setTab] = useState('dashboard');
+  const [loading, setLoading] = useState(false);
   
   const [jobs, setJobs] = useState([]);
   const [containers, setContainers] = useState([]);
@@ -55,49 +236,38 @@ function App() {
   const [showLeadModal, setShowLeadModal] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
   
-  const [jobForm, setJobForm] = useState({ jobId: '', jobName: '', customer: '', status: 'active', assignedTo: '' });
+  const [jobForm, setJobForm] = useState({ jobId: { stringValue: '' }, jobName: { stringValue: '' }, customer: { stringValue: '' }, status: { stringValue: 'active' }, assignedTo: { stringValue: '' } });
   const [containerForm, setContainerForm] = useState({
-    containerId: '', containerName: '', size: '20ft', type: 'standard', status: 'active',
-    inUseStatus: 'available', importVessel: '', eta: '', pol: '', pod: '', freeDays: 0,
-    blNumber: '', dischargeDate: '', doIssueDate: '', gateOutDate: '', emptyReturnDate: '',
-    importCountry: '', currentLocation: '', agent: '', remarks: ''
+    containerId: { stringValue: '' }, containerName: { stringValue: '' }, size: { stringValue: '20ft' }, type: { stringValue: 'standard' }, status: { stringValue: 'active' },
+    pol: { stringValue: '' }, pod: { stringValue: '' }, eta: { stringValue: '' }, blNumber: { stringValue: '' }, currentLocation: { stringValue: '' }
   });
-  const [customerForm, setCustomerForm] = useState({ customerId: '', customerName: '', email: '', phone: '', address: '', country: '' });
-  const [leadForm, setLeadForm] = useState({ leadId: '', companyName: '', contactPerson: '', email: '', phone: '', status: 'new', value: '' });
-  const [accountForm, setAccountForm] = useState({ accountId: '', accountName: '', customer: '', balance: 0, status: 'active' });
+  const [customerForm, setCustomerForm] = useState({ customerId: { stringValue: '' }, customerName: { stringValue: '' }, email: { stringValue: '' }, phone: { stringValue: '' }, country: { stringValue: '' } });
+  const [leadForm, setLeadForm] = useState({ leadId: { stringValue: '' }, companyName: { stringValue: '' }, contactPerson: { stringValue: '' }, email: { stringValue: '' }, phone: { stringValue: '' }, status: { stringValue: 'new' } });
+  const [accountForm, setAccountForm] = useState({ accountId: { stringValue: '' }, accountName: { stringValue: '' }, customer: { stringValue: '' }, balance: { doubleValue: 0 }, status: { stringValue: 'active' } });
 
   useEffect(() => {
-    const initApp = async () => {
-      await waitForFirebase();
-      loadData();
-    };
-    initApp();
-  }, []);
+    loadAllData();
+  }, [user]);
 
-  const loadData = async () => {
-    if (!db) {
-      console.log('Database not ready yet');
-      return;
-    }
-    
+  const loadAllData = async () => {
+    if (!user) return;
+    setLoading(true);
     try {
-      const jobsSnap = await db.collection('jobs').get();
-      setJobs(jobsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const jobsData = await firebaseAPI.getJobs();
+      const containersData = await firebaseAPI.getContainers();
+      const customersData = await firebaseAPI.getCustomers();
+      const leadsData = await firebaseAPI.getLeads();
+      const accountsData = await firebaseAPI.getAccounts();
       
-      const containersSnap = await db.collection('containers').get();
-      setContainers(containersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      
-      const customersSnap = await db.collection('customers').get();
-      setCustomers(customersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      
-      const leadsSnap = await db.collection('leads').get();
-      setLeads(leadsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      
-      const accountsSnap = await db.collection('accounts').get();
-      setAccounts(accountsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setJobs(jobsData);
+      setContainers(containersData);
+      setCustomers(customersData);
+      setLeads(leadsData);
+      setAccounts(accountsData);
     } catch (error) {
       console.error('Error loading data:', error);
     }
+    setLoading(false);
   };
 
   const handleLogin = (e) => {
@@ -112,19 +282,15 @@ function App() {
   };
 
   const addJob = async () => {
-    if (!jobForm.jobId || !jobForm.jobName) {
+    if (!jobForm.jobId.stringValue || !jobForm.jobName.stringValue) {
       alert('Fill Job ID and Job Name');
       return;
     }
-    if (!db) {
-      alert('Database not connected');
-      return;
-    }
     try {
-      await db.collection('jobs').add(jobForm);
-      const snap = await db.collection('jobs').get();
-      setJobs(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      setJobForm({ jobId: '', jobName: '', customer: '', status: 'active', assignedTo: '' });
+      await firebaseAPI.addJob(jobForm);
+      const updatedJobs = await firebaseAPI.getJobs();
+      setJobs(updatedJobs);
+      setJobForm({ jobId: { stringValue: '' }, jobName: { stringValue: '' }, customer: { stringValue: '' }, status: { stringValue: 'active' }, assignedTo: { stringValue: '' } });
       setShowJobModal(false);
     } catch (error) {
       alert('Error: ' + error.message);
@@ -133,7 +299,7 @@ function App() {
 
   const deleteJob = async (jobId) => {
     try {
-      await db.collection('jobs').doc(jobId).delete();
+      await firebaseAPI.deleteJob(jobId);
       setJobs(jobs.filter(j => j.id !== jobId));
     } catch (error) {
       alert('Error: ' + error.message);
@@ -141,23 +307,17 @@ function App() {
   };
 
   const addContainer = async () => {
-    if (!containerForm.containerId || !containerForm.containerName) {
+    if (!containerForm.containerId.stringValue || !containerForm.containerName.stringValue) {
       alert('Fill Container ID and Container Name');
       return;
     }
-    if (!db) {
-      alert('Database not connected');
-      return;
-    }
     try {
-      await db.collection('containers').add(containerForm);
-      const snap = await db.collection('containers').get();
-      setContainers(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      await firebaseAPI.addContainer(containerForm);
+      const updatedContainers = await firebaseAPI.getContainers();
+      setContainers(updatedContainers);
       setContainerForm({
-        containerId: '', containerName: '', size: '20ft', type: 'standard', status: 'active',
-        inUseStatus: 'available', importVessel: '', eta: '', pol: '', pod: '', freeDays: 0,
-        blNumber: '', dischargeDate: '', doIssueDate: '', gateOutDate: '', emptyReturnDate: '',
-        importCountry: '', currentLocation: '', agent: '', remarks: ''
+        containerId: { stringValue: '' }, containerName: { stringValue: '' }, size: { stringValue: '20ft' }, type: { stringValue: 'standard' }, status: { stringValue: 'active' },
+        pol: { stringValue: '' }, pod: { stringValue: '' }, eta: { stringValue: '' }, blNumber: { stringValue: '' }, currentLocation: { stringValue: '' }
       });
       setShowContainerModal(false);
     } catch (error) {
@@ -167,7 +327,7 @@ function App() {
 
   const deleteContainer = async (containerId) => {
     try {
-      await db.collection('containers').doc(containerId).delete();
+      await firebaseAPI.deleteContainer(containerId);
       setContainers(containers.filter(c => c.id !== containerId));
     } catch (error) {
       alert('Error: ' + error.message);
@@ -175,19 +335,15 @@ function App() {
   };
 
   const addCustomer = async () => {
-    if (!customerForm.customerId || !customerForm.customerName) {
+    if (!customerForm.customerId.stringValue || !customerForm.customerName.stringValue) {
       alert('Fill Customer ID and Name');
       return;
     }
-    if (!db) {
-      alert('Database not connected');
-      return;
-    }
     try {
-      await db.collection('customers').add(customerForm);
-      const snap = await db.collection('customers').get();
-      setCustomers(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      setCustomerForm({ customerId: '', customerName: '', email: '', phone: '', address: '', country: '' });
+      await firebaseAPI.addCustomer(customerForm);
+      const updatedCustomers = await firebaseAPI.getCustomers();
+      setCustomers(updatedCustomers);
+      setCustomerForm({ customerId: { stringValue: '' }, customerName: { stringValue: '' }, email: { stringValue: '' }, phone: { stringValue: '' }, country: { stringValue: '' } });
       setShowCustomerModal(false);
     } catch (error) {
       alert('Error: ' + error.message);
@@ -196,7 +352,7 @@ function App() {
 
   const deleteCustomer = async (customerId) => {
     try {
-      await db.collection('customers').doc(customerId).delete();
+      await firebaseAPI.deleteCustomer(customerId);
       setCustomers(customers.filter(c => c.id !== customerId));
     } catch (error) {
       alert('Error: ' + error.message);
@@ -204,19 +360,15 @@ function App() {
   };
 
   const addLead = async () => {
-    if (!leadForm.leadId || !leadForm.companyName) {
+    if (!leadForm.leadId.stringValue || !leadForm.companyName.stringValue) {
       alert('Fill Lead ID and Company Name');
       return;
     }
-    if (!db) {
-      alert('Database not connected');
-      return;
-    }
     try {
-      await db.collection('leads').add(leadForm);
-      const snap = await db.collection('leads').get();
-      setLeads(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      setLeadForm({ leadId: '', companyName: '', contactPerson: '', email: '', phone: '', status: 'new', value: '' });
+      await firebaseAPI.addLead(leadForm);
+      const updatedLeads = await firebaseAPI.getLeads();
+      setLeads(updatedLeads);
+      setLeadForm({ leadId: { stringValue: '' }, companyName: { stringValue: '' }, contactPerson: { stringValue: '' }, email: { stringValue: '' }, phone: { stringValue: '' }, status: { stringValue: 'new' } });
       setShowLeadModal(false);
     } catch (error) {
       alert('Error: ' + error.message);
@@ -225,7 +377,7 @@ function App() {
 
   const deleteLead = async (leadId) => {
     try {
-      await db.collection('leads').doc(leadId).delete();
+      await firebaseAPI.deleteLead(leadId);
       setLeads(leads.filter(l => l.id !== leadId));
     } catch (error) {
       alert('Error: ' + error.message);
@@ -233,19 +385,15 @@ function App() {
   };
 
   const addAccount = async () => {
-    if (!accountForm.accountId || !accountForm.accountName) {
+    if (!accountForm.accountId.stringValue || !accountForm.accountName.stringValue) {
       alert('Fill Account ID and Name');
       return;
     }
-    if (!db) {
-      alert('Database not connected');
-      return;
-    }
     try {
-      await db.collection('accounts').add(accountForm);
-      const snap = await db.collection('accounts').get();
-      setAccounts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      setAccountForm({ accountId: '', accountName: '', customer: '', balance: 0, status: 'active' });
+      await firebaseAPI.addAccount(accountForm);
+      const updatedAccounts = await firebaseAPI.getAccounts();
+      setAccounts(updatedAccounts);
+      setAccountForm({ accountId: { stringValue: '' }, accountName: { stringValue: '' }, customer: { stringValue: '' }, balance: { doubleValue: 0 }, status: { stringValue: 'active' } });
       setShowAccountModal(false);
     } catch (error) {
       alert('Error: ' + error.message);
@@ -254,7 +402,7 @@ function App() {
 
   const deleteAccount = async (accountId) => {
     try {
-      await db.collection('accounts').doc(accountId).delete();
+      await firebaseAPI.deleteAccount(accountId);
       setAccounts(accounts.filter(a => a.id !== accountId));
     } catch (error) {
       alert('Error: ' + error.message);
@@ -302,7 +450,7 @@ function App() {
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div style={{ background: '#1e293b', borderBottom: '1px solid #334155', padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 'bold', textTransform: 'capitalize' }}>{tab}</h1>
+          <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 'bold', textTransform: 'capitalize' }}>{tab} {loading && '(Loading...)'}</h1>
           <div style={{ textAlign: 'right' }}>
             <p style={{ margin: '0 0 4px 0', fontWeight: '600' }}>{user.name}</p>
             <p style={{ margin: 0, color: '#94a3b8', fontSize: '12px', textTransform: 'capitalize' }}>{user.role}</p>
@@ -326,7 +474,7 @@ function App() {
               <button onClick={() => setShowJobModal(true)} style={{ padding: '10px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px', fontWeight: 'bold' }}>+ Add Job</button>
               {jobs.length === 0 ? <p style={{ color: '#94a3b8' }}>No jobs</p> : jobs.map(job => (
                 <div key={job.id} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px', display: 'flex', justifyContent: 'space-between' }}>
-                  <div><h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{job.jobName}</h3><p style={{ color: '#94a3b8', margin: '0', fontSize: '14px' }}>ID: {job.jobId}</p></div>
+                  <div><h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{job.jobName?.stringValue || job.jobName}</h3><p style={{ color: '#94a3b8', margin: '0', fontSize: '14px' }}>ID: {job.jobId?.stringValue || job.jobId}</p></div>
                   {user.role === 'admin' && <button onClick={() => deleteJob(job.id)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>}
                 </div>
               ))}
@@ -334,10 +482,10 @@ function App() {
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
                   <div style={{ background: '#1e293b', padding: '30px', borderRadius: '8px', width: '100%', maxWidth: '500px', border: '1px solid #334155' }}>
                     <h2 style={{ margin: '0 0 20px 0', color: 'white' }}>Add Job</h2>
-                    <input type="text" placeholder="Job ID" value={jobForm.jobId} onChange={(e) => setJobForm({...jobForm, jobId: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="Job Name" value={jobForm.jobName} onChange={(e) => setJobForm({...jobForm, jobName: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="Customer" value={jobForm.customer} onChange={(e) => setJobForm({...jobForm, customer: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="Assigned To" value={jobForm.assignedTo} onChange={(e) => setJobForm({...jobForm, assignedTo: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Job ID" value={jobForm.jobId.stringValue} onChange={(e) => setJobForm({...jobForm, jobId: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Job Name" value={jobForm.jobName.stringValue} onChange={(e) => setJobForm({...jobForm, jobName: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Customer" value={jobForm.customer.stringValue} onChange={(e) => setJobForm({...jobForm, customer: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Assigned To" value={jobForm.assignedTo.stringValue} onChange={(e) => setJobForm({...jobForm, assignedTo: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <button onClick={addJob} style={{ flex: 1, padding: '10px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Create</button>
                       <button onClick={() => setShowJobModal(false)} style={{ flex: 1, padding: '10px', background: '#475569', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
@@ -353,7 +501,7 @@ function App() {
               <button onClick={() => setShowContainerModal(true)} style={{ padding: '10px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px', fontWeight: 'bold' }}>+ Add Container</button>
               {containers.length === 0 ? <p style={{ color: '#94a3b8' }}>No containers</p> : containers.map(container => (
                 <div key={container.id} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px', display: 'flex', justifyContent: 'space-between' }}>
-                  <div><h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{container.containerName}</h3><p style={{ color: '#94a3b8', margin: '0', fontSize: '14px' }}>ID: {container.containerId}</p></div>
+                  <div><h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{container.containerName?.stringValue || container.containerName}</h3><p style={{ color: '#94a3b8', margin: '0', fontSize: '14px' }}>ID: {container.containerId?.stringValue || container.containerId}</p></div>
                   {user.role === 'admin' && <button onClick={() => deleteContainer(container.id)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>}
                 </div>
               ))}
@@ -361,10 +509,11 @@ function App() {
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
                   <div style={{ background: '#1e293b', padding: '30px', borderRadius: '8px', width: '100%', maxWidth: '500px', border: '1px solid #334155', maxHeight: '90vh', overflow: 'auto' }}>
                     <h2 style={{ margin: '0 0 20px 0', color: 'white' }}>Add Container</h2>
-                    <input type="text" placeholder="Container ID" value={containerForm.containerId} onChange={(e) => setContainerForm({...containerForm, containerId: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="Container Name" value={containerForm.containerName} onChange={(e) => setContainerForm({...containerForm, containerName: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="POL" value={containerForm.pol} onChange={(e) => setContainerForm({...containerForm, pol: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="POD" value={containerForm.pod} onChange={(e) => setContainerForm({...containerForm, pod: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Container ID" value={containerForm.containerId.stringValue} onChange={(e) => setContainerForm({...containerForm, containerId: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Container Name" value={containerForm.containerName.stringValue} onChange={(e) => setContainerForm({...containerForm, containerName: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="POL" value={containerForm.pol.stringValue} onChange={(e) => setContainerForm({...containerForm, pol: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="POD" value={containerForm.pod.stringValue} onChange={(e) => setContainerForm({...containerForm, pod: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Current Location" value={containerForm.currentLocation.stringValue} onChange={(e) => setContainerForm({...containerForm, currentLocation: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <button onClick={addContainer} style={{ flex: 1, padding: '10px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Create</button>
                       <button onClick={() => setShowContainerModal(false)} style={{ flex: 1, padding: '10px', background: '#475569', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
@@ -380,7 +529,7 @@ function App() {
               <button onClick={() => setShowCustomerModal(true)} style={{ padding: '10px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px', fontWeight: 'bold' }}>+ Add Customer</button>
               {customers.length === 0 ? <p style={{ color: '#94a3b8' }}>No customers</p> : customers.map(customer => (
                 <div key={customer.id} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px', display: 'flex', justifyContent: 'space-between' }}>
-                  <div><h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{customer.customerName}</h3><p style={{ color: '#94a3b8', margin: '0', fontSize: '14px' }}>ID: {customer.customerId}</p></div>
+                  <div><h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{customer.customerName?.stringValue || customer.customerName}</h3><p style={{ color: '#94a3b8', margin: '0', fontSize: '14px' }}>ID: {customer.customerId?.stringValue || customer.customerId}</p></div>
                   {user.role === 'admin' && <button onClick={() => deleteCustomer(customer.id)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>}
                 </div>
               ))}
@@ -388,10 +537,10 @@ function App() {
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
                   <div style={{ background: '#1e293b', padding: '30px', borderRadius: '8px', width: '100%', maxWidth: '500px', border: '1px solid #334155' }}>
                     <h2 style={{ margin: '0 0 20px 0', color: 'white' }}>Add Customer</h2>
-                    <input type="text" placeholder="Customer ID" value={customerForm.customerId} onChange={(e) => setCustomerForm({...customerForm, customerId: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="Customer Name" value={customerForm.customerName} onChange={(e) => setCustomerForm({...customerForm, customerName: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="email" placeholder="Email" value={customerForm.email} onChange={(e) => setCustomerForm({...customerForm, email: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="tel" placeholder="Phone" value={customerForm.phone} onChange={(e) => setCustomerForm({...customerForm, phone: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Customer ID" value={customerForm.customerId.stringValue} onChange={(e) => setCustomerForm({...customerForm, customerId: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Customer Name" value={customerForm.customerName.stringValue} onChange={(e) => setCustomerForm({...customerForm, customerName: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="email" placeholder="Email" value={customerForm.email.stringValue} onChange={(e) => setCustomerForm({...customerForm, email: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="tel" placeholder="Phone" value={customerForm.phone.stringValue} onChange={(e) => setCustomerForm({...customerForm, phone: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <button onClick={addCustomer} style={{ flex: 1, padding: '10px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Create</button>
                       <button onClick={() => setShowCustomerModal(false)} style={{ flex: 1, padding: '10px', background: '#475569', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
@@ -407,7 +556,7 @@ function App() {
               <button onClick={() => setShowLeadModal(true)} style={{ padding: '10px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px', fontWeight: 'bold' }}>+ Add Lead</button>
               {leads.length === 0 ? <p style={{ color: '#94a3b8' }}>No leads</p> : leads.map(lead => (
                 <div key={lead.id} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px', display: 'flex', justifyContent: 'space-between' }}>
-                  <div><h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{lead.companyName}</h3><p style={{ color: '#94a3b8', margin: '0', fontSize: '14px' }}>ID: {lead.leadId}</p></div>
+                  <div><h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{lead.companyName?.stringValue || lead.companyName}</h3><p style={{ color: '#94a3b8', margin: '0', fontSize: '14px' }}>ID: {lead.leadId?.stringValue || lead.leadId}</p></div>
                   {user.role === 'admin' && <button onClick={() => deleteLead(lead.id)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>}
                 </div>
               ))}
@@ -415,9 +564,9 @@ function App() {
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
                   <div style={{ background: '#1e293b', padding: '30px', borderRadius: '8px', width: '100%', maxWidth: '500px', border: '1px solid #334155' }}>
                     <h2 style={{ margin: '0 0 20px 0', color: 'white' }}>Add Lead</h2>
-                    <input type="text" placeholder="Lead ID" value={leadForm.leadId} onChange={(e) => setLeadForm({...leadForm, leadId: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="Company Name" value={leadForm.companyName} onChange={(e) => setLeadForm({...leadForm, companyName: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="Contact Person" value={leadForm.contactPerson} onChange={(e) => setLeadForm({...leadForm, contactPerson: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Lead ID" value={leadForm.leadId.stringValue} onChange={(e) => setLeadForm({...leadForm, leadId: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Company Name" value={leadForm.companyName.stringValue} onChange={(e) => setLeadForm({...leadForm, companyName: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Contact Person" value={leadForm.contactPerson.stringValue} onChange={(e) => setLeadForm({...leadForm, contactPerson: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <button onClick={addLead} style={{ flex: 1, padding: '10px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Create</button>
                       <button onClick={() => setShowLeadModal(false)} style={{ flex: 1, padding: '10px', background: '#475569', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
@@ -433,7 +582,7 @@ function App() {
               <button onClick={() => setShowAccountModal(true)} style={{ padding: '10px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px', fontWeight: 'bold' }}>+ Add Account</button>
               {accounts.length === 0 ? <p style={{ color: '#94a3b8' }}>No accounts</p> : accounts.map(account => (
                 <div key={account.id} style={{ background: '#1e293b', padding: '20px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '15px', display: 'flex', justifyContent: 'space-between' }}>
-                  <div><h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{account.accountName}</h3><p style={{ color: '#94a3b8', margin: '0', fontSize: '14px' }}>ID: {account.accountId}</p></div>
+                  <div><h3 style={{ margin: '0 0 8px 0', color: 'white' }}>{account.accountName?.stringValue || account.accountName}</h3><p style={{ color: '#94a3b8', margin: '0', fontSize: '14px' }}>ID: {account.accountId?.stringValue || account.accountId}</p></div>
                   {user.role === 'admin' && <button onClick={() => deleteAccount(account.id)} style={{ padding: '8px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>}
                 </div>
               ))}
@@ -441,9 +590,9 @@ function App() {
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
                   <div style={{ background: '#1e293b', padding: '30px', borderRadius: '8px', width: '100%', maxWidth: '500px', border: '1px solid #334155' }}>
                     <h2 style={{ margin: '0 0 20px 0', color: 'white' }}>Add Account</h2>
-                    <input type="text" placeholder="Account ID" value={accountForm.accountId} onChange={(e) => setAccountForm({...accountForm, accountId: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="Account Name" value={accountForm.accountName} onChange={(e) => setAccountForm({...accountForm, accountName: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
-                    <input type="text" placeholder="Customer" value={accountForm.customer} onChange={(e) => setAccountForm({...accountForm, customer: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Account ID" value={accountForm.accountId.stringValue} onChange={(e) => setAccountForm({...accountForm, accountId: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Account Name" value={accountForm.accountName.stringValue} onChange={(e) => setAccountForm({...accountForm, accountName: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
+                    <input type="text" placeholder="Customer" value={accountForm.customer.stringValue} onChange={(e) => setAccountForm({...accountForm, customer: { stringValue: e.target.value }})} style={{ width: '100%', padding: '10px', marginBottom: '12px', background: '#334155', color: 'white', border: '1px solid #475569', borderRadius: '4px', boxSizing: 'border-box' }} />
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <button onClick={addAccount} style={{ flex: 1, padding: '10px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Create</button>
                       <button onClick={() => setShowAccountModal(false)} style={{ flex: 1, padding: '10px', background: '#475569', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
